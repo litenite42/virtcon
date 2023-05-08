@@ -6,7 +6,7 @@
 
 By default, VirtCon references templates from `~/.vtemplates`. To build a 'valid' template, place any folder in that directory with at least a single file named `vtemplate.json`. This file will contain template, project, author, and build metadata to use while generating the new project. Currently, the project and author data must be present or the template file will be considered invalid.
 
-Currently, only some of the template, project, and author portions have been implemented:
+At this moment, only some of the template, project, and author portions have been implemented:
 
 ``` json
 {
