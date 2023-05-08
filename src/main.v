@@ -20,7 +20,7 @@ struct AppConfiguration {
 	subcategory string
 }
 
-fn set_up_flag_parser(args []string) AppConfiguration {
+fn init_app_config(args []string) AppConfiguration {
 	mut fp := flag.new_flag_parser(os.args)
 	fp.application('virtcon')
 	fp.version('v0.0.1')
@@ -29,7 +29,7 @@ fn set_up_flag_parser(args []string) AppConfiguration {
 
 	template_name := fp.string('template', `t`, '', 'Name of which template to reference.')
 	project_name := fp.string('project', `p`, '', 'Name to use in final project.')
-	dest_dir := fp.string('dest-path', `d`, os.join_path(os.home_dir(), 'Documents', 'v-work'),
+	dest_dir := fp.string('destination', `d`, os.join_path(os.home_dir(), 'Documents', 'v-work'),
 		'Where to store generated project')
 	help_entered := fp.bool('help', `h`, false, '')
 	category := fp.string('category', `c`, '', 'Category to filter results by')
@@ -140,7 +140,7 @@ fn fill_placeholders(dest_path string, t Template) ! {
 }
 
 fn main() {
-	app_config := set_up_flag_parser(os.args)
+	app_config := init_app_config(os.args)
 
 	template_paths := os.ls(os.real_path(template_dir)) or {
 		eprintln('No template directory found.')
