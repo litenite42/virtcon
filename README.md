@@ -6,7 +6,7 @@
 
 By default, VirtCon references templates from `~/.vtemplates`. To build a 'valid' template, place any folder in that directory with at least a single file named `vtemplate.json`. This file will contain template, project, author, and build metadata to use while generating the new project. Currently, the project and author data must be present or the template file will be considered invalid.
 
-Currently, only some of the template, project, and author portions have been implemented:
+At this moment, only some of the template, project, and author portions have been implemented:
 
 ``` json
 {
@@ -27,10 +27,10 @@ Currently, only some of the template, project, and author portions have been imp
 ```
 
 ## Installing
-1. Grab the Gitly Url
-    - https://gitly.org/enlite/virtcon.git
+1. Grab the GitHub Mirror Url
+    - `https://github.com/litenite42/virtcon.git`
 2. Use `git` to clone the repo to the location of your choosing
-    - git clone https://gitly.org/enlite/virtcon.git Path-To-Destination
+    - `git clone https://github.com/litenite42/virtcon.git Path-To-Destination`
 3. Build from the root of the project `virtcon/`.
 4. Either add `virtcon/` to your PATH or move the executable somewhere in your path
 
@@ -88,6 +88,7 @@ Options:
 ## Roadmap
 > Tentative. I do plan on adding to this project, but there is no set timeline.
 
+- [ ] Support V init functionality (possibly mimicked by other planned features?)
 - [ ] Add sort priority field to place higher priority items at top of search results
 - [ ] Add output generation rules (files are copied over as is by default)
     - [ ] Copy-only (list of regex paths)
