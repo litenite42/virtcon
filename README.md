@@ -90,7 +90,7 @@ Options:
 
 - [ ] Support V init functionality (possibly mimicked by other planned features?)
 - [ ] Add sort priority field to place higher priority items at top of search results
-- [ ] Add output generation rules (files are copied over as is by default)
+- [ ] Add output generation rules (files are copied over and placeholder fields are updated as appropriate by default)
     - [ ] Copy-only (list of regex paths)
     - [ ] Ignore (list of regex paths)
 - [ ] Accept Compressed Templates (.zip, .7z (?), .tgz)
