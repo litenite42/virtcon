@@ -1,14 +1,14 @@
-module main
+module models
 
-struct Project {
-mut:
+pub struct Project {
+pub mut:
 	name        string
 	description string
 	license     string
 	version     string
 }
 
-fn (p Project) fill_placeholders(line string) string {
+pub fn (p Project) fill_placeholders(line string) string {
 	return line.replace_each(['#projectname#', p.name, '#projectdescription#', p.description,
 		'#projectlicense#', p.license, '#projectversion#', p.version])
 }

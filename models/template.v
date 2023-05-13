@@ -1,7 +1,7 @@
-module main
+module models
 
-struct Template {
-mut:
+pub struct Template {
+pub mut:
 	project     Project
 	author      Author
 	category    string
@@ -10,6 +10,6 @@ mut:
 	sort_priority int
 }
 
-fn (t Template) fill_placeholders(line string) string {
+pub fn (t Template) fill_placeholders(line string) string {
 	return t.author.fill_placeholders(t.project.fill_placeholders(line))
 }

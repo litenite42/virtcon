@@ -5,6 +5,8 @@ import x.json2
 import flag
 import arrays
 import termtable as tt
+import models
+import util
 
 const (
 	template_dir = os.join_path(os.home_dir(), '.vtemplates')
@@ -52,67 +54,6 @@ fn gen_template_path(template_name string) string {
 	return os.join_path(template_dir, template_name, 'vtemplate.json')
 }
 
-fn new_project_description(doc map[string]json2.Any) ?Project {
-	project_doc := doc['project'] or { return none }
-	template_values := project_doc as map[string]json2.Any
-
-	name := template_values['name'] or { json2.null }
-	description := template_values['description'] or { json2.null }
-	license := template_values['license'] or { json2.null }
-	version := template_values['version'] or { json2.null }
-
-	return Project{
-		name: name.str()
-		description: description.str()
-		license: license.str()
-		version: version.str()
-	}
-}
-
-fn new_author_description(doc map[string]json2.Any) ?Author {
-	author_doc := doc['author'] or { return none }
-	template_values := author_doc as map[string]json2.Any
-
-	developer := template_values['developer'] or { json2.null }
-	organization := template_values['organization'] or { json2.null }
-	email := template_values['email'] or { json2.null }
-
-	return Author{
-		developer: developer.str()
-		organization: organization.str()
-		email: email.str()
-	}
-}
-
-fn new_template_description(doc map[string]json2.Any) Template {
-	mut is_valid := true
-	
-	project := new_project_description(doc) or {
-		eprintln('Could not find project information.')
-		is_valid = false
-		Project{}
-	}
-	
-	author := new_author_description(doc) or {
-		eprintln('Could not find author information.')
-		is_valid = false
-		Author{}
-	}
-
-	js_category := doc['category']  or { json2.null }
-	js_subcategory := doc['subcategory']  or { json2.null }
-	js_sortpriority := doc['sort_priority']  or { json2.null }
-
-	return Template{
-		project: project
-		author: author
-		category: js_category.str()
-		subcategory: js_subcategory.str()
-		sort_priority: js_sortpriority.int()
-		is_valid: is_valid
-	}
-}
-
 fn copy_project_files(src_path string, dest_path string) ! {
 	if !os.exists(dest_path) {
 		os.mkdir(dest_path) or { return error('Could not make v-work folder for generated project') }
@@ -122,7 +63,7 @@ fn copy_project_files(src_path string, dest_path string) ! {
 	os.rm(os.join_path(dest_path, 'vtemplate.json')) or { return error('No vtemplate.json found') }
 }
 
-fn fill_placeholders(dest_path string, t Template) ! {
+fn fill_placeholders(dest_path string, t models.Template) ! {
 	os.walk(dest_path, fn [t] (f string) {
 		mut file_lines := os.read_lines(f) or {
 			eprintln('Unable to open ${f}.')
@@ -152,7 +93,7 @@ fn main() {
 		usable_template_paths = usable_template_paths.filter(it.to_lower() == app_config.template_name.to_lower())
 	}
 
-	mut templates := []Template{}
+	mut templates := []models.Template{}
 
 	for template in usable_template_paths {
 		template_path := gen_template_path(template)
@@ -161,7 +102,7 @@ fn main() {
 		template_json := json2.raw_decode(template_content) or { continue }
 
 		template_map := template_json.as_map()
-		templates << new_template_description(template_map)
+		templates << util.new_template(template_map)
 	}
 
 	if !app_config.category.is_blank() {
@@ -189,7 +130,7 @@ fn main() {
 			eprintln('Invalid template selected. Please check logs for any reported errors.')
 		}
 	} else if templates.len > 0 {
-		grouped_templates := arrays.group_by<string,Template>(templates, fn(t Template) string {
+		grouped_templates := arrays.group_by<string,models.Template>(templates, fn(t models.Template) string {
 			return '${t.category},${t.subcategory}'
 		})
 
@@ -197,7 +138,7 @@ fn main() {
 		table_rows << ['Available templates:', '', '']
 		for cat_subcat, cat_templates in grouped_templates {
 			table_rows << [cat_subcat, '', '']
-			
+
 			mut temps := cat_templates[..]
 			temps.sort(a.sort_priority < b.sort_priority)
 			
