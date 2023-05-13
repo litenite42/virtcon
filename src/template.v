@@ -7,6 +7,7 @@ mut:
 	category    string
 	subcategory string
 	is_valid    bool
+	sort_priority int
 }
 
 fn (t Template) fill_placeholders(line string) string {

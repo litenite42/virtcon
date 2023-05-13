@@ -86,15 +86,13 @@ fn new_author_description(doc map[string]json2.Any) ?Author {
 
 fn new_template_description(doc map[string]json2.Any) Template {
 	mut is_valid := true
-
-	// dump(template_map)
+	
 	project := new_project_description(doc) or {
 		eprintln('Could not find project information.')
 		is_valid = false
 		Project{}
 	}
-
-	// dump(project)
+	
 	author := new_author_description(doc) or {
 		eprintln('Could not find author information.')
 		is_valid = false
@@ -103,19 +101,19 @@ fn new_template_description(doc map[string]json2.Any) Template {
 
 	js_category := doc['category']  or { json2.null }
 	js_subcategory := doc['subcategory']  or { json2.null }
+	js_sortpriority := doc['sort_priority']  or { json2.null }
 
 	return Template{
 		project: project
 		author: author
 		category: js_category.str()
 		subcategory: js_subcategory.str()
+		sort_priority: js_sortpriority.int()
 		is_valid: is_valid
 	}
 }
 
 fn copy_project_files(src_path string, dest_path string) ! {
-	// dump(src_path)
-	// dump(dest_path)
 	if !os.exists(dest_path) {
 		os.mkdir(dest_path) or { return error('Could not make v-work folder for generated project') }
 	}
@@ -199,18 +197,15 @@ fn main() {
 		table_rows << ['Available templates:', '', '']
 		for cat_subcat, cat_templates in grouped_templates {
 			table_rows << [cat_subcat, '', '']
-			table_rows << cat_templates.map([it.project.name, it.project.description, it.author.developer])
+			
+			mut temps := cat_templates[..]
+			temps.sort(a.sort_priority < b.sort_priority)
+			
+			table_rows << temps.map([it.project.name, it.project.description, it.author.developer])
 		}
 
 		t := tt.Table{
 			data: table_rows
-			// The following settings are optional and have these defaults:
-			style: .grid
-			header_style: .bold
-			align: .left
-			orientation: .row
-			padding: 1
-			tabsize: 4
 		}
 		println(t)
 	}
