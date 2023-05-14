@@ -78,6 +78,10 @@ fn fill_placeholders(dest_path string, t models.Template) ! {
 	})
 }
 
+struct App {
+	cmp util.IComparer
+}
+
 fn main() {
 	app_config := init_app_config(os.args)
 
@@ -134,13 +138,18 @@ fn main() {
 			return '${t.category},${t.subcategory}'
 		})
 
+		app := App {
+			cmp: util.PrioritySortComparer {}
+		}
+
 		mut table_rows := [][]string{}
 		table_rows << ['Available templates:', '', '']
 		for cat_subcat, cat_templates in grouped_templates {
 			table_rows << [cat_subcat, '', '']
 
 			mut temps := cat_templates[..]
-			temps.sort(a.sort_priority < b.sort_priority)
+			cmp := app.cmp
+			temps.sort_with_compare(fn [cmp] (a &models.Template, b &models.Template) int { return cmp.compare(a,b) })
 			
 			table_rows << temps.map([it.project.name, it.project.description, it.author.developer])
 		}
