@@ -1,7 +1,7 @@
 module models
 
 pub struct Author {
-pub mut:	
+pub mut:
 	developer    string
 	organization string
 	email        string

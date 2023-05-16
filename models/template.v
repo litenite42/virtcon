@@ -2,11 +2,11 @@ module models
 
 pub struct Template {
 pub mut:
-	project     Project
-	author      Author
-	category    string
-	subcategory string
-	is_valid    bool
+	project       Project
+	author        Author
+	category      string
+	subcategory   string
+	is_valid      bool
 	sort_priority int
 }
 

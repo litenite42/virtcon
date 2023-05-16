@@ -37,22 +37,22 @@ pub fn new_author(doc map[string]json2.Any) ?models.Author {
 
 pub fn new_template(doc map[string]json2.Any) models.Template {
 	mut is_valid := true
-	
+
 	project := new_project(doc) or {
 		eprintln('Could not find project information.')
 		is_valid = false
 		models.Project{}
 	}
-	
+
 	author := new_author(doc) or {
 		eprintln('Could not find author information.')
 		is_valid = false
 		models.Author{}
 	}
 
-	js_category := doc['category']  or { json2.null }
-	js_subcategory := doc['subcategory']  or { json2.null }
-	js_sortpriority := doc['sort_priority']  or { json2.null }
+	js_category := doc['category'] or { json2.null }
+	js_subcategory := doc['subcategory'] or { json2.null }
+	js_sortpriority := doc['sort_priority'] or { json2.null }
 
 	return models.Template{
 		project: project
