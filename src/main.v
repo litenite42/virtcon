@@ -30,7 +30,7 @@ struct AppConfiguration {
 fn configure_app(args []string) App {
 	mut fp := flag.new_flag_parser(os.args)
 	fp.application('virtcon')
-	fp.version('v0.0.1')
+	fp.version('v0.0.2')
 	fp.description('Virtually Constructs projects based on a stored template.')
 	fp.skip_executable()
 
@@ -147,9 +147,10 @@ fn main() {
 		})
 
 		mut table_rows := [][]string{}
-		table_rows << ['Available templates:', '', '']
+		table_rows << ['Available templates:', '', '', '']
+		table_rows << ['Cat.,Subcat. / Template', 'Description', 'Author', 'Sort Priority']
 		for cat_subcat, cat_templates in grouped_templates {
-			table_rows << [cat_subcat, '', '']
+			table_rows << [cat_subcat, '', '', '']
 
 			mut temps := cat_templates[..]
 			cmp := app.cmp
@@ -157,7 +158,7 @@ fn main() {
 				return cmp.compare(a, b)
 			})
 
-			table_rows << temps.map([it.project.name, it.project.description, it.author.developer])
+			table_rows << temps.map([it.project.name, it.project.description, it.author.developer, it.sort_priority.str()])
 		}
 
 		t := tt.Table{

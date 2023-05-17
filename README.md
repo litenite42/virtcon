@@ -22,7 +22,8 @@ At this moment, only some of the template, project, and author portions have bee
         "email" : "email@server.org"
     },
     "category": "code",
-    "subcategory": ""
+    "subcategory": "",
+    "sort_priority": 100
 }
 ```
 
@@ -45,6 +46,8 @@ As mentioned in the Setup section, you'll need the `~/.vtemplates` directory cre
 | destination |   d  | Where to store generated project |
 | category |  c  | Category to filter results by |
 | subcategory | s | Subcategory to filter results by |
+| order | o | Sort Descdending if present |
+| field | f | Which field to sort by |
 
 ### Metadata Placeholders
 Metadata nested within the template can be injected into the generated project's files by referencing them with the following 
@@ -59,30 +62,37 @@ With valid templates **welcome-world** and **hello-world** (stored at `~/.vtempl
 ``` 
 zsh $ virtcon
 
-+----------------------+-------------------------------+------------------+
-| Available templates: |                               |                  |
-+----------------------+-------------------------------+------------------+
-| web,demo             |                               |                  |
-+----------------------+-------------------------------+------------------+
-| welcome-world        | Simple Welcome World Template | Sample Developer |
-+----------------------+-------------------------------+------------------+
-| code,                |                               |                  |
-+----------------------+-------------------------------+------------------+
-| hello-world          | Simple Hello World Template   | Sample Developer |
-+----------------------+-------------------------------+------------------+
-virtcon v0.0.1
++-------------------------+-------------------------------+------------------+---------------+
+| Available templates:    |                               |                  |               |
++-------------------------+-------------------------------+------------------+---------------+
+| Cat.,Subcat. / Template | Description                   | Author           | Sort Priority |
++-------------------------+-------------------------------+------------------+---------------+
+| web,demo                |                               |                  |               |
++-------------------------+-------------------------------+------------------+---------------+
+| welcome-world           | Simple Welcome World Template | Sample Developer | 0             |
++-------------------------+-------------------------------+------------------+---------------+
+| goodbye-world           | Simple Welcome World Template | Sample Developer | 1             |
++-------------------------+-------------------------------+------------------+---------------+
+| code,                   |                               |                  |               |
++-------------------------+-------------------------------+------------------+---------------+
+| hello-world             | Simple Hello World Template   | Sample Developer | 0             |
++-------------------------+-------------------------------+------------------+---------------+
+virtcon v0.0.2
 -----------------------------------------------
 Usage: virtcon [options] [ARGS]
 
 Description: Virtually Constructs projects based on a stored template.
 
 Options:
-  -t, --template <string>    Name of which template to reference.
-  -p, --project <string>     Name to use in final project.
-  -d, --dest-path <string>   Where to store generated project
+  -t, --template <string>   Name of which template to reference.
+  -p, --project <string>    Name to use in final project.
+  -d, --destination <string>
+                            Where to store generated project
   -h, --help                
-  -c, --category <string>    Category to filter results by
-  -s, --subcategory <string> Subcategory to filter results by
+  -c, --cat <string>        Category to filter results by
+  -s, --subcat <string>     Subcategory to filter results by
+  -o, --order               Sort Descending if present
+  -f, --field <string>      Which field to sort by  
 ```
 
 ## Roadmap
