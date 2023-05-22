@@ -126,21 +126,22 @@ fn main() {
 	}
 
 	if templates.len == 1 && !app.config.template_name.is_blank() {
+		if !templates[0].is_valid {
+			eprintln('Invalid template selected. Please check logs for any reported errors.')
+			unsafe { goto after_loop }
+		}
+
 		mut template := templates[0]
 
-		if template.is_valid {
-			src_path := os.join_path(template_dir, usable_template_paths[0])
-			mut dest_name := usable_template_paths[0]
-			if !app.config.project_name.is_blank() {
-				template.project.name = app.config.project_name
-				dest_name = app.config.project_name
-			}
-			dest_path := os.join_path(app.config.destination, dest_name)
-			copy_project_files(src_path, dest_path) or { eprintln(err.msg()) }
-			fill_placeholders(dest_path, template) or { eprintln(err.msg()) }
-		} else {
-			eprintln('Invalid template selected. Please check logs for any reported errors.')
+		src_path := os.join_path(template_dir, usable_template_paths[0])
+		mut dest_name := usable_template_paths[0]
+		if !app.config.project_name.is_blank() {
+			template.project.name = app.config.project_name
+			dest_name = app.config.project_name
 		}
+		dest_path := os.join_path(app.config.destination, dest_name)
+		copy_project_files(src_path, dest_path) or { eprintln(err.msg()) }
+		fill_placeholders(dest_path, template) or { eprintln(err.msg()) }
 	} else if templates.len > 0 {
 		grouped_templates := arrays.group_by[string, models.Template](templates, fn (t models.Template) string {
 			return '${t.category},${t.subcategory}'
@@ -158,7 +159,8 @@ fn main() {
 				return cmp.compare(a, b)
 			})
 
-			table_rows << temps.map([it.project.name, it.project.description, it.author.developer, it.sort_priority.str()])
+			table_rows << temps.map([it.project.name, it.project.description, it.author.developer,
+				it.sort_priority.str()])
 		}
 
 		t := tt.Table{
@@ -166,7 +168,7 @@ fn main() {
 		}
 		println(t)
 	}
-
+	after_loop:
 	if app.config.help_entered {
 		println(app.config.usage)
 	}

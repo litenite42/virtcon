@@ -99,7 +99,7 @@ Options:
 > Tentative. I do plan on adding to this project, but there is no set timeline.
 
 - [ ] Support V init functionality (possibly mimicked by other planned features?)
-- [ ] Add sort priority field to place higher priority items at top of search results
+- [x] Add sort priority field to place higher priority items at top of search results
 - [ ] Add output generation rules (files are copied over and placeholder fields are updated as appropriate by default)
     - [ ] Copy-only (list of regex paths)
     - [ ] Ignore (list of regex paths)

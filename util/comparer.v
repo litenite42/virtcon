@@ -26,6 +26,7 @@ pub fn init_comparer(config ComparerConfig) Comparer {
 	comparer.fn_map = {
 		'sort-priority': comparer.sort_priority
 		'project-name':  comparer.project_name
+		'author-organization' : comparer.author_organization
 	}
 
 	return comparer
@@ -65,4 +66,8 @@ pub fn (c Comparer) sort_priority(a &models.Template, b &models.Template) int {
 
 pub fn (c Comparer) project_name(a &models.Template, b &models.Template) int {
 	return cmp[string](c.sort_asc, a.project.name, b.project.name)
+}
+
+pub fn (c Comparer) author_organization(a &models.Template, b &models.Template) int {
+	return cmp[string](c.sort_asc, a.author.organization, b.author.organization)
 }
