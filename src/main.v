@@ -7,7 +7,6 @@ import arrays
 import termtable as tt
 import models
 import util
-import pcre
 
 const (
 	template_dir = os.join_path(os.home_dir(), '.vtemplates')
@@ -65,93 +64,6 @@ fn gen_template_path(template_name string) string {
 	return os.join_path(template_dir, template_name, 'vtemplate.json')
 }
 
-fn fill_placeholders(t models.Template, dest_path string) ! {
-		mut file_lines := os.read_lines(dest_path) or {
-			eprintln('Unable to open ${dest_path}.')
-			return
-		}
-
-		for ndx := 0; ndx < file_lines.len; ndx++ {
-			file_lines[ndx] = t.fill_placeholders(file_lines[ndx])
-		}
-
-		os.write_file(dest_path, file_lines.join('\n')) or { eprintln('Error writing to file ${dest_path}') }
-}
-
-struct RegexConfig {
-	regex_list []string
-	check_against string
-	label string = 'ignore'
-}
-
-fn check_list_regex(config RegexConfig) bool {
-	if config.regex_list.len == 0 {
-		return false
-	}
-	
-	for ignore_regex in config.regex_list {
-		mut re := pcre.new_regex(ignore_regex, 0) or { 
-			eprintln(err) 
-			return false	
-		}
-
-		m := re.match_str(config.check_against, 0, 0) or {
-			println('No ${config.label} match!')
-			continue 
-		}
-		println('${config.label} match')
-		return true
-	}
-
-	return false
-}
-
-fn ignore_template_file(t &models.Template, f string) bool {
-	return check_list_regex(regex_list: t.ignore_list check_against: f label: 'ignore' )
-}
-
-fn copy_only_file(t &models.Template, f string) bool {
-	return check_list_regex(regex_list: t.copy_only_list check_against: f label: '')
-}
-
-fn scaffold_project(t models.Template, src_path string, dest_path string) ! {
-	os.walk(src_path, fn [t, src_path, dest_path] (f string) {
-		println(f)
-		if f.contains('vtemplate.json') {
-			return
-		}
-		
-		if ignore_template_file(t, f) {
-			println('Skipped')
-			return
-		}
-
-
-		dest_file := f.replace(src_path, dest_path)
-
-		if !os.exists(os.dir(dest_file)) {
-			os.mkdir(os.dir(dest_file)) or {
-				eprintln(err)
-			}
-		}
-
-		os.cp(f, dest_file) or {
-			eprintln(err)
-			return
-		}
-
-		if copy_only_file(t, f) {		
-			println('copy-only. end of processing')	
-			return
-		}
-
-		fill_placeholders(t, dest_file) or {
-			eprintln(err)
-			return
-		}
-	})
-}
-
 fn main() {
 	app := configure_app(os.args)
 
@@ -204,7 +116,7 @@ fn main() {
 			dest_name = app.config.project_name
 		}
 		dest_path := os.join_path(app.config.destination, dest_name)
-		scaffold_project(template, src_path, dest_path) or { eprintln(err.msg()) }
+		util.scaffold_project(template, src_path, dest_path) or { eprintln(err.msg()) }
 	} else if templates.len > 0 {
 		grouped_templates := arrays.group_by[string, models.Template](templates, fn (t models.Template) string {
 			return '${t.category},${t.subcategory}'
