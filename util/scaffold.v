@@ -10,6 +10,18 @@ struct RegexConfig {
 	label         string = 'ignore'
 }
 
+fn dprintln(s string) {
+	$if debug {
+		println(s)
+	}
+}
+
+fn ddump[T](t T) {
+	$if debug {
+		dump(t)
+	}
+}
+
 fn check_list_regex(config RegexConfig) bool {
 	if config.regex_list.len == 0 {
 		return false
@@ -22,10 +34,11 @@ fn check_list_regex(config RegexConfig) bool {
 		}
 
 		re.match_str(config.check_against, 0, 0) or {
-			println('No ${config.label} match.')
+			dprintln('No ${config.label} match.')
 			continue
 		}
-		println('${config.label} match')
+
+		dprintln('${config.label} match')
 		return true
 	}
 
@@ -57,13 +70,14 @@ fn fill_placeholders(t models.Template, dest_path string) ! {
 
 pub fn scaffold_project(t models.Template, src_path string, dest_path string) ! {
 	os.walk(src_path, fn [t, src_path, dest_path] (f string) {
-		println(f)
+		dprintln(f)
+
 		if f.contains('vtemplate.json') {
 			return
 		}
 
 		if ignore_template_file(t, f) {
-			println('Skipped')
+			dprintln('Skipped')
 			return
 		}
 
@@ -79,7 +93,7 @@ pub fn scaffold_project(t models.Template, src_path string, dest_path string) ! 
 		}
 
 		if copy_only_file(t, f) {
-			println('copy-only. end of processing')
+			dprintln('copy-only. end of processing')
 			return
 		}
 
