@@ -53,6 +53,11 @@ pub fn new_template(doc map[string]json2.Any) models.Template {
 	js_category := doc['category'] or { json2.null }
 	js_subcategory := doc['subcategory'] or { json2.null }
 	js_sortpriority := doc['sort_priority'] or { json2.null }
+	js_ignorelist := doc['ignore'] or { json2.null }
+	js_copyonlylist := doc['copyonly'] or { json2.null }
+
+	ignore_list := js_ignorelist.arr().map(it.str())
+	copy_only_list := js_copyonlylist.arr().map(it.str())
 
 	return models.Template{
 		project: project
@@ -61,5 +66,7 @@ pub fn new_template(doc map[string]json2.Any) models.Template {
 		subcategory: js_subcategory.str()
 		sort_priority: js_sortpriority.int()
 		is_valid: is_valid
+		ignore_list : ignore_list
+		copy_only_list : copy_only_list
 	}
 }

@@ -7,6 +7,7 @@ import arrays
 import termtable as tt
 import models
 import util
+import pcre
 
 const (
 	template_dir = os.join_path(os.home_dir(), '.vtemplates')
@@ -64,21 +65,9 @@ fn gen_template_path(template_name string) string {
 	return os.join_path(template_dir, template_name, 'vtemplate.json')
 }
 
-fn copy_project_files(src_path string, dest_path string) ! {
-	if !os.exists(dest_path) {
-		os.mkdir(dest_path) or {
-			return error('Could not make v-work folder for generated project')
-		}
-	}
-
-	os.cp_all(src_path, dest_path, true)!
-	os.rm(os.join_path(dest_path, 'vtemplate.json')) or { return error('No vtemplate.json found') }
-}
-
-fn fill_placeholders(dest_path string, t models.Template) ! {
-	os.walk(dest_path, fn [t] (f string) {
-		mut file_lines := os.read_lines(f) or {
-			eprintln('Unable to open ${f}.')
+fn fill_placeholders(t models.Template, dest_path string) ! {
+		mut file_lines := os.read_lines(dest_path) or {
+			eprintln('Unable to open ${dest_path}.')
 			return
 		}
 
@@ -86,7 +75,80 @@ fn fill_placeholders(dest_path string, t models.Template) ! {
 			file_lines[ndx] = t.fill_placeholders(file_lines[ndx])
 		}
 
-		os.write_file(f, file_lines.join('\n')) or { eprintln('Error writing to file ${f}') }
+		os.write_file(dest_path, file_lines.join('\n')) or { eprintln('Error writing to file ${dest_path}') }
+}
+
+struct RegexConfig {
+	regex_list []string
+	check_against string
+	label string = 'ignore'
+}
+
+fn check_list_regex(config RegexConfig) bool {
+	if config.regex_list.len == 0 {
+		return false
+	}
+	
+	for ignore_regex in config.regex_list {
+		mut re := pcre.new_regex(ignore_regex, 0) or { 
+			eprintln(err) 
+			return false	
+		}
+
+		m := re.match_str(config.check_against, 0, 0) or {
+			println('No ${config.label} match!')
+			continue 
+		}
+		println('${config.label} match')
+		return true
+	}
+
+	return false
+}
+
+fn ignore_template_file(t &models.Template, f string) bool {
+	return check_list_regex(regex_list: t.ignore_list check_against: f label: 'ignore' )
+}
+
+fn copy_only_file(t &models.Template, f string) bool {
+	return check_list_regex(regex_list: t.copy_only_list check_against: f label: '')
+}
+
+fn scaffold_project(t models.Template, src_path string, dest_path string) ! {
+	os.walk(src_path, fn [t, src_path, dest_path] (f string) {
+		println(f)
+		if f.contains('vtemplate.json') {
+			return
+		}
+		
+		if ignore_template_file(t, f) {
+			println('Skipped')
+			return
+		}
+
+
+		dest_file := f.replace(src_path, dest_path)
+
+		if !os.exists(os.dir(dest_file)) {
+			os.mkdir(os.dir(dest_file)) or {
+				eprintln(err)
+			}
+		}
+
+		os.cp(f, dest_file) or {
+			eprintln(err)
+			return
+		}
+
+		if copy_only_file(t, f) {		
+			println('copy-only. end of processing')	
+			return
+		}
+
+		fill_placeholders(t, dest_file) or {
+			eprintln(err)
+			return
+		}
 	})
 }
 
@@ -114,7 +176,9 @@ fn main() {
 		template_json := json2.raw_decode(template_content) or { continue }
 
 		template_map := template_json.as_map()
-		templates << util.new_template(template_map)
+		mut new_template := util.new_template(template_map)
+		new_template.source = template
+		templates << new_template
 	}
 
 	if !app.config.category.is_blank() {
@@ -140,18 +204,17 @@ fn main() {
 			dest_name = app.config.project_name
 		}
 		dest_path := os.join_path(app.config.destination, dest_name)
-		copy_project_files(src_path, dest_path) or { eprintln(err.msg()) }
-		fill_placeholders(dest_path, template) or { eprintln(err.msg()) }
+		scaffold_project(template, src_path, dest_path) or { eprintln(err.msg()) }
 	} else if templates.len > 0 {
 		grouped_templates := arrays.group_by[string, models.Template](templates, fn (t models.Template) string {
 			return '${t.category},${t.subcategory}'
 		})
 
 		mut table_rows := [][]string{}
-		table_rows << ['Available templates:', '', '', '']
-		table_rows << ['Cat.,Subcat. / Template', 'Description', 'Author', 'Sort Priority']
+		table_rows << ['Available templates:', '', '', '', '']
+		table_rows << ['Cat.,Subcat. / Template Name', 'Scaffolded Project', 'Description', 'Author', 'Sort Priority']
 		for cat_subcat, cat_templates in grouped_templates {
-			table_rows << [cat_subcat, '', '', '']
+			table_rows << [cat_subcat, '', '', '', '']
 
 			mut temps := cat_templates[..]
 			cmp := app.cmp
@@ -159,7 +222,7 @@ fn main() {
 				return cmp.compare(a, b)
 			})
 
-			table_rows << temps.map([it.project.name, it.project.description, it.author.developer,
+			table_rows << temps.map([it.source, it.project.name, it.project.description, it.author.developer,
 				it.sort_priority.str()])
 		}
 

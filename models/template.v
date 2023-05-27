@@ -8,6 +8,9 @@ pub mut:
 	subcategory   string
 	is_valid      bool
 	sort_priority int
+	ignore_list []string
+	copy_only_list []string
+	source string
 }
 
 pub fn (t Template) fill_placeholders(line string) string {
