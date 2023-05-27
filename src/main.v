@@ -104,7 +104,9 @@ fn main() {
 	if templates.len == 1 && !app.config.template_name.is_blank() {
 		if !templates[0].is_valid {
 			eprintln('Invalid template selected. Please check logs for any reported errors.')
-			unsafe { goto after_loop }
+			unsafe {
+				goto after_loop
+			}
 		}
 
 		mut template := templates[0]
@@ -124,7 +126,8 @@ fn main() {
 
 		mut table_rows := [][]string{}
 		table_rows << ['Available templates:', '', '', '', '']
-		table_rows << ['Cat.,Subcat. / Template Name', 'Scaffolded Project', 'Description', 'Author', 'Sort Priority']
+		table_rows << ['Cat.,Subcat. / Template Name', 'Scaffolded Project', 'Description', 'Author',
+			'Sort Priority']
 		for cat_subcat, cat_templates in grouped_templates {
 			table_rows << [cat_subcat, '', '', '', '']
 

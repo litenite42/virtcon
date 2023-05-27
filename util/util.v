@@ -66,7 +66,7 @@ pub fn new_template(doc map[string]json2.Any) models.Template {
 		subcategory: js_subcategory.str()
 		sort_priority: js_sortpriority.int()
 		is_valid: is_valid
-		ignore_list : ignore_list
-		copy_only_list : copy_only_list
+		ignore_list: ignore_list
+		copy_only_list: copy_only_list
 	}
 }
