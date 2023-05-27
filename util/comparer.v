@@ -24,9 +24,10 @@ pub fn init_comparer(config ComparerConfig) Comparer {
 	mut comparer := init_comparer_inner(config)
 
 	comparer.fn_map = {
-		'sort-priority': comparer.sort_priority
-		'project-name':  comparer.project_name
-		'author-organization' : comparer.author_organization
+		'sort-priority':       comparer.sort_priority
+		'project-name':        comparer.project_name
+		'author-organization': comparer.author_organization
+		'template-name':       comparer.sort_template
 	}
 
 	return comparer
@@ -62,6 +63,10 @@ pub fn (c Comparer) compare(a &models.Template, b &models.Template) int {
 
 pub fn (c Comparer) sort_priority(a &models.Template, b &models.Template) int {
 	return cmp[int](c.sort_asc, a.sort_priority, b.sort_priority)
+}
+
+pub fn (c Comparer) sort_template(a &models.Template, b &models.Template) int {
+	return cmp[string](c.sort_asc, a.source, b.source)
 }
 
 pub fn (c Comparer) project_name(a &models.Template, b &models.Template) int {
