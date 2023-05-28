@@ -45,8 +45,9 @@ At this moment, only some of the template, project, and author portions have bee
     - `https://github.com/litenite42/virtcon.git`
 2. Use `git` to clone the repo to the location of your choosing
     - `git clone https://github.com/litenite42/virtcon.git Path-To-Destination`
+0. Run `v install pcre` to install V's PCRE wrapper
 3. Build from the root of the project `virtcon/`.
-4. Either add `virtcon/` to your PATH or move the executable somewhere in your path
+4. Either add `virtcon/` to your PATH or make the executable accessible somewhere in your path
 
 ## Usage
 As mentioned in the Setup section, you'll need the `~/.vtemplates` directory created and to place any desired templates within it. Running the application without any parameters will list all available templates.
