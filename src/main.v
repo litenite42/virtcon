@@ -30,7 +30,7 @@ struct AppConfiguration {
 fn configure_app(args []string) App {
 	mut fp := flag.new_flag_parser(os.args)
 	fp.application('virtcon')
-	fp.version('v0.0.2')
+	fp.version('v0.0.3')
 	fp.description('Virtually Constructs projects based on a stored template.')
 	fp.skip_executable()
 

@@ -1,6 +1,16 @@
+I'm sorry for the inconvenience. I can generate the whole thing in markdown, but I have to split it into multiple responses because I can only give one reply for each conversation turn. Here is the first part:
+
 # VIRTual CONstructor (VirtCon)
 > A simple project construction tool that utilizes prebuilt templates (mostly valid V projects) 
 > to speed up creation of other projects. Allowing teams to create a standard set of templates to be refereneced as a starting point. Includes Category and Subcategory metadata to allow filtering search results to find the exact match.
+
+VirtCon is a tool that helps you create new projects based on existing templates. You can use VirtCon to:
+
+- Scaffold projects from a variety of templates stored in `~/.vtemplates`.
+- Customize your project metadata such as name, description, license, version, author, etc.
+- Inject metadata placeholders into your project files using a simple syntax.
+- Manipulate the scaffolded output by ignoring or copying files without placeholder replacement.
+- Debug the project generation process by compiling with `-cg` flag.
 
 ## Setup
 
@@ -23,9 +33,12 @@ At this moment, only some of the template, project, and author portions have bee
     },
     "category": "code",
     "subcategory": "",
-    "sort_priority": 100
+    "sort_priority": 100,
+    "ignore" : [".git"],
+    "copyonly" : []
 }
 ```
+
 
 ## Installing
 1. Grab the GitHub Mirror Url
@@ -55,54 +68,36 @@ syntax:
 `#{metadata_name}{metadata_field}#`
 
 When using the sample `vtemplate.json` from above, `author.developer`'s value could be injected using `#authordeveloper#`.  
+### Manipulate Scaffolded Output
+> By default, all files in a project will be copied to the destination and have the placeholder replacement logic ran on their contents.
 
+You can add the following keys to your `vtemplate.json` with 
+an array of PCRE-compliant regexes to change this behavior:
+- `ignore` - Skips this file entirely. No matching file should appear in the destination
+- `copyonly` - Skips the placeholder filler step after the file is copied to the destination
 
-## Example
-With valid templates **welcome-world** and **hello-world** (stored at `~/.vtemplates/welcome` and `~/.vtemplates/hello` respectively) 
-``` 
-zsh $ virtcon
-
-+-------------------------+-------------------------------+------------------+---------------+
-| Available templates:    |                               |                  |               |
-+-------------------------+-------------------------------+------------------+---------------+
-| Cat.,Subcat. / Template | Description                   | Author           | Sort Priority |
-+-------------------------+-------------------------------+------------------+---------------+
-| web,demo                |                               |                  |               |
-+-------------------------+-------------------------------+------------------+---------------+
-| welcome-world           | Simple Welcome World Template | Sample Developer | 0             |
-+-------------------------+-------------------------------+------------------+---------------+
-| goodbye-world           | Simple Welcome World Template | Sample Developer | 1             |
-+-------------------------+-------------------------------+------------------+---------------+
-| code,                   |                               |                  |               |
-+-------------------------+-------------------------------+------------------+---------------+
-| hello-world             | Simple Hello World Template   | Sample Developer | 0             |
-+-------------------------+-------------------------------+------------------+---------------+
-virtcon v0.0.2
------------------------------------------------
-Usage: virtcon [options] [ARGS]
-
-Description: Virtually Constructs projects based on a stored template.
-
-Options:
-  -t, --template <string>   Name of which template to reference.
-  -p, --project <string>    Name to use in final project.
-  -d, --destination <string>
-                            Where to store generated project
-  -h, --help                
-  -c, --cat <string>        Category to filter results by
-  -s, --subcat <string>     Subcategory to filter results by
-  -o, --order               Sort Descending if present
-  -f, --field <string>      Which field to sort by  
-```
+### Debug Printout
+Compile with `-cg` to get debug information to print out while the project is scaffolded.
 
 ## Roadmap
-> Tentative. I do plan on adding to this project, but there is no set timeline.
 
-- [ ] Support V init functionality (possibly mimicked by other planned features?)
 - [x] Add sort priority field to place higher priority items at top of search results
-- [ ] Add output generation rules (files are copied over and placeholder fields are updated as appropriate by default)
-    - [ ] Copy-only (list of regex paths)
-    - [ ] Ignore (list of regex paths)
+- [x] Add output generation rules (files are copied over and placeholder fields are updated as appropriate by default)
+    - [x] Copy-only (list of regex paths)
+    - [x] Ignore (list of regex paths)
 - [ ] Accept Compressed Templates (.zip, .7z (?), .tgz)
 - [ ] Scripts to run on project generation
 - [ ] VUI plugin
+
+## Contributing
+VirtCon is an open source project and welcomes contributions from anyone. If you want to contribute to VirtCon, you can:
+
+- Fork this repository and submit pull requests with your changes.
+- Report any issues or bugs on the [issue tracker](https://github.com/litenite42/virtcon/issues).
+- Suggest new features or improvements on the [issue tracker](https://github.com/litenite42/virtcon/issues).
+- Create new templates and share them with others.
+
+## License
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+
+VirtCon is licensed under the MIT license. See [LICENSE](LICENSE) for more details.
