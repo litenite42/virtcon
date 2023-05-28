@@ -1,5 +1,3 @@
-I'm sorry for the inconvenience. I can generate the whole thing in markdown, but I have to split it into multiple responses because I can only give one reply for each conversation turn. Here is the first part:
-
 # VIRTual CONstructor (VirtCon)
 > A simple project construction tool that utilizes prebuilt templates (mostly valid V projects) 
 > to speed up creation of other projects. Allowing teams to create a standard set of templates to be refereneced as a starting point. Includes Category and Subcategory metadata to allow filtering search results to find the exact match.
