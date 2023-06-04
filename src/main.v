@@ -1,6 +1,7 @@
 module main
 
 import os
+import szip
 import x.json2
 import flag
 import arrays
@@ -25,6 +26,29 @@ struct AppConfiguration {
 	usage         string
 	category      string
 	subcategory   string
+}
+
+fn (a App) has_template_metadata(template_dir string, template_name string) bool {
+	if template_dir.len == 0 {
+		return false
+	}
+	template_path := os.join_path(template_dir, template_name)
+
+	if os.exists(os.join_path(template_path, 'vtemplate.json')) {
+		return true
+	}
+
+	mut archive := szip.open(template_path, .default_compression, .write) or {
+		eprintln(err)
+		return false
+	}
+
+	archive.open_entry('vtemplate.json') or {
+		eprintln(err)
+		return false
+	}
+
+	return true
 }
 
 fn configure_app(args []string) App {
@@ -60,6 +84,39 @@ fn configure_app(args []string) App {
 	}
 }
 
+fn parse_new_template(template string) !models.Template {
+	template_path := gen_template_path(template)
+	template_content := os.read_file(template_path)!
+
+	template_json := json2.raw_decode(template_content)!
+
+	template_map := template_json.as_map()
+	mut new_template := util.new_template(template_map)
+	new_template.source = template
+
+	return new_template
+}
+
+fn generate_project(mut template models.Template, template_path string, config AppConfiguration) !string {
+	if !template.is_valid {
+		msg := 'Invalid template selected. Please check logs for any reported errors.'
+		eprintln(msg)
+
+		return error(msg)
+	}
+
+	src_path := os.join_path(template_dir, template_path)
+	mut dest_name := template_path
+	if !config.project_name.is_blank() {
+		template.project.name = config.project_name
+		dest_name = config.project_name
+	}
+	dest_path := os.join_path(config.destination, dest_name)
+	util.scaffold_project(template, src_path, dest_path) or { eprintln(err.msg()) }
+
+	return dest_path
+}
+
 fn gen_template_path(template_name string) string {
 	return os.join_path(template_dir, template_name, 'vtemplate.json')
 }
@@ -72,8 +129,7 @@ fn main() {
 		return
 	}
 
-	mut usable_template_paths := template_paths.filter(os.exists(os.join_path(template_dir,
-		it, 'vtemplate.json')))
+	mut usable_template_paths := template_paths.filter(app.has_template_metadata)
 
 	if !app.config.template_name.is_blank() {
 		usable_template_paths = usable_template_paths.filter(it.to_lower() == app.config.template_name.to_lower())
@@ -82,15 +138,7 @@ fn main() {
 	mut templates := []models.Template{}
 
 	for template in usable_template_paths {
-		template_path := gen_template_path(template)
-		template_content := os.read_file(template_path) or { continue }
-
-		template_json := json2.raw_decode(template_content) or { continue }
-
-		template_map := template_json.as_map()
-		mut new_template := util.new_template(template_map)
-		new_template.source = template
-		templates << new_template
+		templates << parse_new_template(template) or { continue }
 	}
 
 	if !app.config.category.is_blank() {
@@ -102,23 +150,14 @@ fn main() {
 	}
 
 	if templates.len == 1 && !app.config.template_name.is_blank() {
-		if !templates[0].is_valid {
-			eprintln('Invalid template selected. Please check logs for any reported errors.')
+		generated_project_path := generate_project(mut templates[0], usable_template_paths[0],
+			app.config) or { '' }
+
+		if generated_project_path.is_blank() {
 			unsafe {
 				goto after_loop
 			}
 		}
-
-		mut template := templates[0]
-
-		src_path := os.join_path(template_dir, usable_template_paths[0])
-		mut dest_name := usable_template_paths[0]
-		if !app.config.project_name.is_blank() {
-			template.project.name = app.config.project_name
-			dest_name = app.config.project_name
-		}
-		dest_path := os.join_path(app.config.destination, dest_name)
-		util.scaffold_project(template, src_path, dest_path) or { eprintln(err.msg()) }
 	} else if templates.len > 0 {
 		grouped_templates := arrays.group_by[string, models.Template](templates, fn (t models.Template) string {
 			return '${t.category},${t.subcategory}'
