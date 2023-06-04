@@ -117,6 +117,31 @@ fn generate_project(mut template models.Template, template_path string, config A
 	return dest_path
 }
 
+fn list_templates(templates []models.Template, compare_fn util.CompareFn) {
+		grouped_templates := arrays.group_by[string, models.Template](templates, fn (t models.Template) string {
+			return '${t.category},${t.subcategory}'
+		})
+
+		mut table_rows := [][]string{}
+		table_rows << ['Available templates:', '', '', '', '']
+		table_rows << ['Cat.,Subcat. / Template Name', 'Scaffolded Project', 'Description', 'Author',
+			'Sort Priority']
+		for cat_subcat, cat_templates in grouped_templates {
+			table_rows << [cat_subcat, '', '', '', '']
+
+			mut temps := cat_templates[..]
+			temps.sort_with_compare(compare_fn)
+
+			table_rows << temps.map([it.source, it.project.name, it.project.description, it.author.developer,
+				it.sort_priority.str()])
+		}
+
+		t := tt.Table{
+			data: table_rows
+		}
+		println(t)
+}
+
 fn gen_template_path(template_name string) string {
 	return os.join_path(template_dir, template_name, 'vtemplate.json')
 }
@@ -159,31 +184,7 @@ fn main() {
 			}
 		}
 	} else if templates.len > 0 {
-		grouped_templates := arrays.group_by[string, models.Template](templates, fn (t models.Template) string {
-			return '${t.category},${t.subcategory}'
-		})
-
-		mut table_rows := [][]string{}
-		table_rows << ['Available templates:', '', '', '', '']
-		table_rows << ['Cat.,Subcat. / Template Name', 'Scaffolded Project', 'Description', 'Author',
-			'Sort Priority']
-		for cat_subcat, cat_templates in grouped_templates {
-			table_rows << [cat_subcat, '', '', '', '']
-
-			mut temps := cat_templates[..]
-			cmp := app.cmp
-			temps.sort_with_compare(fn [cmp] (a &models.Template, b &models.Template) int {
-				return cmp.compare(a, b)
-			})
-
-			table_rows << temps.map([it.source, it.project.name, it.project.description, it.author.developer,
-				it.sort_priority.str()])
-		}
-
-		t := tt.Table{
-			data: table_rows
-		}
-		println(t)
+		list_templates(templates, app.cmp.compare)
 	}
 	after_loop:
 	if app.config.help_entered {
