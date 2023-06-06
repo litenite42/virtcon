@@ -12,13 +12,13 @@ pub const (
 )
 
 pub struct App {
-	pub:
+pub:
 	cmp    util.Comparer
 	config AppConfiguration
 }
 
 pub struct AppConfiguration {
-	pub:
+pub:
 	template_name string
 	project_name  string
 	destination   string
@@ -76,7 +76,7 @@ pub fn (app App) generate_project(mut template models.Template, template_path st
 		return error(msg)
 	}
 
-	src_path := os.join_path(template_dir, template_path)
+	src_path := os.join_path(.template_dir, template_path)
 	mut dest_name := template_path
 	if !app.config.project_name.is_blank() {
 		template.project.name = app.config.project_name

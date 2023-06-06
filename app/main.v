@@ -2,9 +2,9 @@ module main
 
 import os
 import flag
-import termtable as tt
-import util
 import virtcon
+import virtcon.util
+import virtcon.termtable as tt
 
 fn configure_app(args []string) virtcon.App {
 	mut fp := flag.new_flag_parser(os.args)
@@ -42,7 +42,7 @@ fn configure_app(args []string) virtcon.App {
 fn main() {
 	app := configure_app(os.args)
 
-	template_paths := os.ls(os.real_path(virtcon.template_dir)) or {
+	template_paths := os.ls(os.real_path(template_dir)) or {
 		eprintln('No template directory found.')
 		return
 	}
